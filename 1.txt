@@ -1,0 +1,74 @@
+function Trig_Starfall______________________2_Conditions takes nothing returns boolean
+    if ( not ( GetSpellAbilityId() == 'A02H' ) ) then
+        return false
+    endif
+    return true
+endfunction
+
+function Trig_Starfall______________________2_Func008002003 takes nothing returns boolean
+    return ( IsUnitAliveBJ(GetFilterUnit()) == true )
+endfunction
+
+function Trig_Starfall______________________2_Func010A takes nothing returns nothing
+    set udg_Starfall_Unit[2] = GetEnumUnit()
+    call UnitDamageTargetBJ( udg_Starfall_Unit[1], udg_Starfall_Unit[2], I2R(( 900 * GetUnitAbilityLevelSwapped('A02H', GetSpellAbilityUnit()) )), ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL )
+    set udg_Starfall_Loc[3] = GetUnitLoc(udg_Starfall_Unit[2])
+    call AddSpecialEffectLocBJ( udg_Starfall_Loc[3], "Abilities\\Spells\\Human\\Thunderclap\\ThunderClapCaster.mdl" )
+    call DestroyEffectBJ( GetLastCreatedEffectBJ() )
+endfunction
+
+function Trig_Starfall______________________2_Actions takes nothing returns nothing
+    set udg_Starfall_Unit[1] = GetTriggerUnit()
+    set udg_Starfall_Loc[1] = GetUnitLoc(udg_Starfall_Unit[1])
+    set udg_Starfall_Loc[2] = GetSpellTargetLoc()
+    call AddSpecialEffectLocBJ( udg_Starfall_Loc[2], "ShootingStar.mdx" )
+    set udg_Starfall_Effect = GetLastCreatedEffectBJ()
+    call TriggerSleepAction( 0.75 )
+    call DestroyEffectBJ( udg_Starfall_Effect )
+    set udg_Starfall_Group = GetUnitsInRangeOfLocMatching(400.00, udg_Starfall_Loc[2], Condition(function Trig_Starfall______________________2_Func008002003))
+    call GroupRemoveUnitSimple( GetSpellAbilityUnit(), udg_Starfall_Group )
+    call ForGroupBJ( udg_Starfall_Group, function Trig_Starfall______________________2_Func010A )
+    call EnableTrigger( gg_trg_Starfall_Knockback )
+    call TriggerSleepAction( 1.00 )
+    call DisableTrigger( gg_trg_Starfall_Knockback )
+    call SetUnitPathing( udg_Starfall_Unit[2], true )
+    call RemoveLocation(udg_Starfall_Loc[1])
+    call RemoveLocation(udg_Starfall_Loc[2])
+    call RemoveLocation(udg_Starfall_Loc[3])
+    call RemoveLocation(udg_Starfall_Loc[4])
+    call DestroyGroup(udg_Starfall_Group)
+endfunction
+
+//===========================================================================
+function InitTrig_Starfall______________________2 takes nothing returns nothing
+    set gg_trg_Starfall______________________2 = CreateTrigger(  )
+    call TriggerRegisterAnyUnitEventBJ( gg_trg_Starfall______________________2, EVENT_PLAYER_UNIT_SPELL_EFFECT )
+    call TriggerAddCondition( gg_trg_Starfall______________________2, Condition( function Trig_Starfall______________________2_Conditions ) )
+    call TriggerAddAction( gg_trg_Starfall______________________2, function Trig_Starfall______________________2_Actions )
+endfunction
+
+function Trig_Starfall_Knockback______________________2_Func001A takes nothing returns nothing
+    set udg_Starfall_Unit[2] = GetEnumUnit()
+    call SetUnitPathing( udg_Starfall_Unit[2], false )
+    set udg_Starfall_Loc[3] = GetUnitLoc(udg_Starfall_Unit[2])
+    set udg_Starfall_Loc[4] = PolarProjectionBJ(udg_Starfall_Loc[3], -10.00, AngleBetweenPoints(udg_Starfall_Loc[3], udg_Starfall_Loc[2]))
+    call SetUnitPositionLocFacingLocBJ( udg_Starfall_Unit[2], udg_Starfall_Loc[4], udg_Starfall_Loc[2] )
+    call AddSpecialEffectLocBJ( udg_Starfall_Loc[3], "Star.mdx" )
+    call DestroyEffectBJ( GetLastCreatedEffectBJ() )
+    set udg_Starfall_Loc[3] = udg_Starfall_Loc[4]
+    call TriggerSleepAction( 1.50 )
+    call SetUnitPathing( udg_Starfall_Unit[2], true )
+endfunction
+
+function Trig_Starfall_Knockback______________________2_Actions takes nothing returns nothing
+    call ForGroupBJ( udg_Starfall_Group, function Trig_Starfall_Knockback______________________2_Func001A )
+endfunction
+
+//===========================================================================
+function InitTrig_Starfall_Knockback______________________2 takes nothing returns nothing
+    set gg_trg_Starfall_Knockback______________________2 = CreateTrigger(  )
+    call DisableTrigger( gg_trg_Starfall_Knockback______________________2 )
+    call TriggerRegisterTimerEventPeriodic( gg_trg_Starfall_Knockback______________________2, 0.03 )
+    call TriggerAddAction( gg_trg_Starfall_Knockback______________________2, function Trig_Starfall_Knockback______________________2_Actions )
+endfunction
+
